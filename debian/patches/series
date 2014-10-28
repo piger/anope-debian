@@ -1,0 +1,3 @@
+fix-cmakefile-install.patch
+change-executable-name.patch
+do-not-install-confs.patch

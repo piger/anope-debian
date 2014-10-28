@@ -1,0 +1,13 @@
+Description: use a sane executable file name
+Author: Daniel Kertesz <daniel@spatof.org>
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -281,7 +281,7 @@
+   set(PROGRAM_NAME anope)
+ # Under *nix, we set the executable name for Anope to be services
+ else(WIN32)
+-  set(PROGRAM_NAME services)
++  set(PROGRAM_NAME anope)
+ endif(WIN32)
+ 
+ # If we are not using Visual Studio, we'll run the following checks

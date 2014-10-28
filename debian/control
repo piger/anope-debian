@@ -1,0 +1,13 @@
+Source: anope
+Section: net
+Priority: optional
+Maintainer: Daniel Kertesz <daniel@spatof.org>
+Build-Depends: debhelper (>= 8.0.0), cmake, cdbs
+Standards-Version: 3.9.5
+Homepage: http://anope.org
+
+Package: anope
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: modular IRC services
+ Anope is a set of IRC Services designed for flexibility and ease of use.
