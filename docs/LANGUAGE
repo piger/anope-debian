@@ -1,0 +1,53 @@
+Anope Mutli Language Support
+----------------------------
+
+1) Building Anope with gettext support
+2) Adding a new language
+3) Using languages with modules
+
+1) Building Anope with gettext support
+
+    To build Anope with gettext support, gettext and its development libraries must be installed on the system.
+
+    On Debian install the locales-all package.
+
+    On Ubuntu run locale-gen for each language you want to enable.
+        For example:
+        locale-gen es_ES.UTF-8
+
+        Then execute:
+        dpkg-reconfigure locales
+
+    Building Anope on Windows with gettext support is explained in docs/WIN32.txt
+
+2) Adding a new language
+
+    Anope uses gettext (http://www.gnu.org/software/gettext/) to translate messages for users. To add a new language
+    install gettext and run `msginit -l language -o anope.language.po -i anope.pot`. For example if I was translating to
+    Spanish I could run `msginit -l es_ES -o anope.es_ES.po -i anope.pot`. Open the newly generating .po file and start
+    translating. Once you are done simply rerun ./Config; make && make install and add the language to your services.conf.
+    Note that on Windows it is not quite this simple, windows.cpp must be edited and Anope recompiled and restarted.
+
+    Poedit (http://www.poedit.net/) is a popular po file editor, and we recommend using it or another editor designed to edit
+    po files (especially on Windows).
+
+    If you have finished a language file translation and you want others to use it, please send it to team@anope.org
+    (don't forget to mention clearly your (nick)name, your e-mail and the language name). You'll of course get full credit for it.
+
+    NOTE: There is no guarantee we will use your work so please do not be offended if we say no thanks.
+
+3) Using langages with modules
+
+    Module authors can easily add the ability to have their modules translated by adding _() around the strings they
+    want translated (messages to the user, etc).
+
+    If you want to translate a module someone has made, first generate a .pot file if there isn't one already using
+    `xgettext -s -d modulename -o modulename.pot --from-code=utf-8 --keyword --keyword=_ modulename.cpp`.
+    The .pot file is a template of all of the language strings extracted from the source file.
+
+    Next, run msginit on the .pot file with
+    `msginit -l language -o modulename.language.po -i modulename.pot`.
+    Translate the new .po file and rerun ./Config; make && make install.
+
+    All .po and .pot files should be placed in modules/third/language. Additionally an update script is provided there
+    that will create .pot files and merge any changes to it with existing .po files.

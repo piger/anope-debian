@@ -1,0 +1,128 @@
+Anope Modules
+-------------
+
+1) Introduction
+2) Installation
+3) Usage
+4) Usage Example
+5) More Modules
+6) Support
+7) Information for Developers
+8) Modules Repository
+
+1) Introduction
+
+    Anope 1.6 onwards supports external modules. External modules are pieces
+    of code that can be attached to a running Anope process dynamically. These
+    modules can serve several purposes, and perform all kind of operations to
+    enhance your network.
+
+2) Installation
+
+    1. If modules are supported by your system, they will be configured
+       automatically when you run ./Config. The modules will be installed
+       to the modules directory in your data path (by default this will
+       be ~/services/data/modules).
+
+    2. Compile Anope as usual using ./Config. The "make" process will now
+       compile module support into Anope, and compile the default sample
+       modules, and any other module located in the modules folder or any
+       of its sub-directories, eg. modules/extra.
+
+    3. Install Anope as usual. The "make install" process will place the
+       compiled modules in their runtime location, making them available
+       for loading.
+
+    4. Start or restart services to make use of the new Anope executable.
+       Note that you do not need to restart to load new or changed modules,
+       only to make use of a new Anope executable.
+
+3) Usage
+
+    All module manipulation commands are done through OperServ. These are:
+
+       MODLOAD     Load a module
+       MODRELOAD   Reload a module
+       MODUNLOAD   Un-Load a module
+       MODLIST     List loaded modules
+       MODINFO     Info about a loaded module
+
+    Access to the above commands require the operserv/modload and modlist
+    permissions. Refer to operserv.example.conf.
+
+    You can also load (and pre-load) Modules automatically by loading them
+    on startup. To do so, edit any one of the configuration files (you may
+    want to use modules.conf for third-party/extra modules, or a config
+    file relevant to the *Serv your module operates on, eg. hostserv.conf),
+    and use the following method to load a module on startup or reload:
+        module { name="hs_modname" }
+
+4) Usage Example
+
+    /msg OperServ modload ns_identify
+    -OperServ- Module ns_identify loaded
+
+    /msg OperServ modinfo ns_identify
+    -OperServ- Module: ns_identify Version: 1.9.7 Author: Anope loaded: Jun 17 18:43:08 2012 BST (2 minutes ago)
+    -OperServ-    Providing service: nickserv/identify
+    -OperServ-    Command ID on NickServ is linked to nickserv/identify
+    -OperServ-    Command IDENTIFY on NickServ is linked to nickserv/identify
+
+    /msg OperServ modreload ns_identify
+    -OperServ- Module ns_identify reloaded
+
+    /msg OperServ modunload ns_identify
+    -OperServ- Module ns_identify unloaded
+
+    /msg NickServ IDENTIFY
+    -NickServ- Unknown command identify. "/msg NickServ HELP" for help.
+    NOTE: Doing the above, with the command still existing in a config file,
+          will result in a log message, similar to the following:
+          <@NickServ> Command IDENTIFY exists on me, but its service nickserv/identify was not found!
+
+    * Note that the name of the module source file is "ns_identify.cpp", yet we
+      load and reference the module as "ns_identify" only. By naming convention
+      modules have an abbreviated service name they attach to (hs_ for
+      HostServ, cs_ for ChanServ, etc) followed by a descriptive keyword.
+
+5) More Modules
+
+    You can download more useful modules from http://modules.anope.org/. Just
+    grab the module file (usually with a .cpp extension). Place the module
+    file in your modules (anope-1.9.x/modules/third) folder; although any of
+    the other folders within the modules directory will work.
+
+    The new modules need to be compiled and installed before you can make
+    use of them:
+
+    1. Make sure you're in the main source directory. (usually anope-1.X.XX/)
+    2. Run ./Config to find and configure modules, then `cd build`.
+    3. Run `make` to compile Anope, and any modules.
+    4. Run `make install` to copy the compiled binaries to the ~/services/
+       directory.
+
+    You can now use /msg OperServ MODLOAD to load the new modules.
+
+6) Support
+
+    The Anope team is not responsible or liable for any unofficial module
+    (i.e. anything other than what was released with the Anope package).
+
+    Use modules at your own risk, and make sure you get them from a
+    reputable source. You might get module support by contacting the module
+    author, posting on our online forum, or maybe on our #anope channel
+    at /server irc.anope.org.
+
+7) Information for Developers
+
+    There are a number of useful documents on the Anope Wiki. The Anope Wiki
+    can be reached at:
+    
+    * http://wiki.anope.org/
+
+8) Modules Repository
+
+    You can find modules at http://modules.anope.org
+
+    These modules are 3rd party and as such are not supported by the Anope Team.
+    Contact the Module Author directly with problems, not the Anope Team.
