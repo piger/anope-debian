@@ -1,0 +1,475 @@
+#!/bin/sh
+#
+# Configuration script for Services.
+#
+# Anope (c) 2003-2014 Anope Team
+# Contact us at team@anope.org
+#
+# This program is free but copyrighted software; see the file COPYING for
+# details.
+#
+# Based on the original code of Epona by PegSoft.
+# Based on the original code of Services by Andy Church.
+#
+###########################################################################
+
+echo2 () {
+	$ECHO2 "$*$ECHO2SUF" # these are defined later
+}
+
+exists () { # because some shells don't have test -e
+	if [ -f $1 -o -d $1 -o -p $1 -o -c $1 -o -b $1 ] ; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+Load_Cache () {
+	if [ -f $SOURCE_DIR/config.cache -a -r $SOURCE_DIR/config.cache -a ! "$IGNORE_CACHE" ] ; then
+		echo "Using defaults from config.cache. To ignore, $SOURCE_DIR/Config -nocache"
+		echo ""
+		. $SOURCE_DIR/config.cache
+		CAN_QUICK="yes"
+	else
+		CAN_QUICK="no"
+	fi
+}
+
+Run_Build_System () {
+	WITH_INST=""
+	WITH_RUN=""
+	WITH_PERM=""
+	EXTRA_INCLUDE=""
+	EXTRA_LIBS=""
+	GEN_TYPE=""
+
+	if [ "$INSTDIR" != "" ] ; then
+		WITH_INST="-DINSTDIR:STRING=$INSTDIR"
+	fi
+
+	if [ "$RUNGROUP" != "" ] ; then
+		WITH_RUN="-DRUNGROUP:STRING=$RUNGROUP"
+	fi
+
+	if [ "$UMASK" != "" ] ; then
+		WITH_PERM="-DDEFUMASK:STRING=$UMASK"
+	fi
+
+	if [ "$DEBUG" = "yes" ] ; then
+		BUILD_TYPE="-DCMAKE_BUILD_TYPE:STRING=DEBUG"
+	else
+		BUILD_TYPE="-DCMAKE_BUILD_TYPE:STRING=RELEASE"
+	fi
+
+	if [ "$USE_RUN_CC_PL" = "yes" ] ; then
+		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=ON"
+	else
+		RUN_CC_PL="-DUSE_RUN_CC_PL:BOOLEAN=OFF"
+	fi
+
+	if [ "$USE_PCH" = "yes" ] ; then
+		PCH="-DUSE_PCH:BOOLEAN=ON"
+	else
+		PCH="-DUSE_PCH:BOOLEAN=OFF"
+	fi
+
+	if [ "$EXTRA_INCLUDE_DIRS" != "" ] ; then
+		EXTRA_INCLUDE="-DEXTRA_INCLUDE:STRING=$EXTRA_INCLUDE_DIRS"
+	fi
+
+	if [ "$EXTRA_LIB_DIRS" != "" ] ; then
+		EXTRA_LIBS="-DEXTRA_LIBS:STRING=$EXTRA_LIB_DIRS"
+	fi
+
+	case `uname -s` in
+		MINGW*)
+			GEN_TYPE="-G\"MSYS Makefiles\""
+			;;
+	esac
+
+	if [ "$SOURCE_DIR" = "." ] ; then
+		pwdsave=`pwd`
+		test -d build || mkdir build
+		cd "build"
+		REAL_SOURCE_DIR=".."
+	else
+		REAL_SOURCE_DIR="$SOURCE_DIR"
+	fi
+
+	echo "cmake $GEN_TYPE $WITH_INST $WITH_RUN $WITH_PERM $BUILD_TYPE $RUN_CC_PL $PCH $EXTRA_INCLUDE $EXTRA_LIBS $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR"
+
+	cmake $GEN_TYPE $WITH_INST $WITH_RUN $WITH_PERM $BUILD_TYPE $RUN_CC_PL $PCH $EXTRA_INCLUDE $EXTRA_LIBS $EXTRA_CONFIG_ARGS $REAL_SOURCE_DIR
+
+	echo ""
+	if [ "$SOURCE_DIR" = "." ] ; then
+		echo "Now cd build, then run make to build Anope."
+		cd "$pwdsave"
+	else
+		echo "Now run make to build Anope."
+	fi
+}
+
+ECHO2SUF=''
+if [ "`echo -n a ; echo -n b`" = "ab" ] ; then
+	ECHO2='echo -n'
+elif [ "`echo 'a\c' ; echo 'b\c'`" = "ab" ] ; then
+	ECHO2='echo' ; ECHO2SUF='\c'
+elif [ "`printf 'a' 2>&1 ; printf 'b' 2>&1`" = "ab" ] ; then
+	ECHO2='printf "%s"'
+else
+	# oh well...
+	ECHO2='echo'
+fi
+export ECHO2 ECHO2SUF
+
+###########################################################################
+# Init values
+###########################################################################
+
+INSTDIR=$HOME/services
+RUNGROUP=
+UMASK=
+DEBUG="no"
+USE_RUN_CC_PL="no"
+USE_PCH="no"
+EXTRA_INCLUDE_DIRS=
+EXTRA_LIB_DIRS=
+EXTRA_CONFIG_ARGS=
+CAN_QUICK="no"
+SOURCE_DIR=`dirname $0`
+
+###########################################################################
+# Check out the options
+###########################################################################
+
+while [ $# -ge 1 ] ; do
+	if [ $1 = "--help" ] ; then
+		echo "Config utility for Anope"
+		echo "------------------------"
+		echo "Syntax: ./Config [options]"
+		echo "-nocache     Ignore settings saved in config.cache"
+		echo "-nointro     Skip intro (disclaimer, etc)"
+		echo "-quick       Skip questions, go straight to cmake"
+		exit 0
+	elif [ $1 = "-nocache" ] ; then
+		IGNORE_CACHE="1"
+	elif [ $1 = "-nointro" ] ; then
+		NO_INTRO="1"
+	elif [ $1 = "-quick" -o $1 = "-q" ] ; then
+		Load_Cache
+		if [ "$CAN_QUICK" = "yes" ] ; then
+			Run_Build_System
+		else
+			echo ""
+			echo "Can't find cache file (config.cache), aborting..."
+		fi
+		exit 0
+	fi
+	shift 1
+done
+
+###########################################################################
+# Check for CMake and (optionally) install it
+###########################################################################
+
+which cmake > /dev/null
+if [ $? -ne 0 ] ; then
+	clear
+	if exists "cmake-bin" ; then :
+	else
+		echo "Anope requires CMake 2.4 or newer, which can be downloaded at http://cmake.org"
+		echo "If you have installed CMake already, ensure it is in your PATH environment variable."
+
+		if [ `uname` = "Linux" ] ; then
+
+			echo ""
+			echo "Config can attempt to install CMake for you now, which"
+			echo "will take approximately 50 MB of disk space."
+			echo "Would you like to install CMake now?"
+			echo2 "[y] "
+			read YN
+			if [ "$YN" = "n" ] ; then
+				exit 0
+			fi
+
+			echo "Downloading CMake... this may take a minute or two."
+			wget -q http://anope.org/cmake/linux-i386.php -O cmake-bin.tar.gz
+			if [ $? -ne 0 ] ; then
+				rm -f cmake-bin.tar.gz
+				echo "Unable to download CMake"
+				exit 0
+			fi
+			mkdir -p cmake-bin
+			tar zxf cmake-bin.tar.gz -C cmake-bin
+			rm -f cmake-bin.tar.gz
+			echo "Done!"
+		else
+			exit 0
+		fi
+	fi
+
+	CMAKE_BIN=`find cmake-bin -name cmake`
+	CMAKE_BIN="`pwd`/`dirname $CMAKE_BIN`"
+	PATH="$PATH:$CMAKE_BIN"
+fi
+
+###########################################################################
+
+if [ ! "$NO_INTRO" ] ; then
+	case `uname -s` in
+		MINGW*)
+			PAGER=less
+			;;
+		*)
+			PAGER=more
+			clear
+			;;
+	esac
+	. $SOURCE_DIR/src/version.sh
+	cat $SOURCE_DIR/.BANNER | sed "s/CURVER/$VERSION_MAJOR.$VERSION_MINOR.$VERSION_PATCH$VERSION_EXTRA/" | sed "s@SOURCE_DIR@$SOURCE_DIR@" | $PAGER
+	echo ""
+else
+	echo ""
+fi
+
+echo "Beginning Services configuration."
+echo ""
+
+###########################################################################
+# Load the cache
+###########################################################################
+
+if [ ! "$IGNORE_CACHE" ] ; then
+	Load_Cache
+fi
+
+# Ask the user anything we need to know ahead of time.
+
+export ok INPUT
+
+####
+
+ok=0
+echo "In what directory should Anope be installed?"
+while [ $ok -eq 0 ] ; do
+	echo2 "[$INSTDIR] "
+	if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+	if [ ! "$INPUT" ] ; then
+		INPUT=$INSTDIR
+	fi
+	if [ ! -d "$INPUT" ] ; then
+		if exists "$INPUT" ; then
+			echo "$INPUT exists, but is not a directory!"
+		else
+			echo "$INPUT does not exist.  Create it?"
+			echo2 "[y] "
+			read YN
+			if [ "$YN" != "n" ] ; then
+				if mkdir -p $INPUT ; then
+					ok=1
+				fi
+			fi
+		fi
+	elif exists "$INPUT/include/services.h" ; then
+		echo "You cannot use the Services source directory as a target directory."
+	else
+		ok=1
+	fi
+done
+INSTDIR=$INPUT
+echo ""
+
+####
+
+OLD_RUNGROUP="$RUNGROUP"
+if [ "$RUNGROUP" ] ; then
+	echo "Which group should all Services data files be owned by?  (If Services"
+	echo "should not force files to be owned by a particular group, type \"none\""
+	echo "(without the quotes) and press Return.)"
+else
+	echo "Which group should all Services data files be owned by?  (If Services"
+	echo "should not force files to be owned by a particular group, just press"
+	echo "Return.)"
+fi
+echo2 "[$RUNGROUP] "
+if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+if [ "$INPUT" ] ; then
+	if [ "$INPUT" = "none" ] ; then
+		RUNGROUP=""
+	else
+		RUNGROUP="$INPUT"
+	fi
+fi
+echo ""
+
+####
+
+if [ ! "$UMASK" -o "$RUNGROUP" != "$OLD_RUNGROUP" ] ; then
+	if [ "$RUNGROUP" ] ; then
+		UMASK=007
+	else
+		UMASK=077
+	fi
+fi
+
+ok=0
+echo "What should the default umask for data files be (in octal)?"
+echo "(077 = only accessible by owner; 007 = accessible by owner and group)"
+while [ $ok -eq 0 ] ; do
+	echo2 "[$UMASK] "
+	if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+	if [ ! "$INPUT" ] ; then
+		INPUT=$UMASK
+	fi
+	if [ `echo "$INPUT" | grep -c '[^0-7]'` -gt 0 ] ; then
+		echo "$UMASK is not a valid octal number!"
+	else
+		if [ "`echo $INPUT | cut -c1`" != "0" ] ; then
+			INPUT=0$INPUT
+		fi
+		ok=1
+	fi
+done
+UMASK=$INPUT
+echo ""
+
+####
+
+TEMP_YN="n"
+if [ "$DEBUG" = "yes" ] ; then
+	TEMP_YN="y"
+fi
+echo "Would you like to build a debug version of Anope?"
+echo2 "[$TEMP_YN] "
+read YN
+if [ "$YN" ] ; then
+	if [ "$YN" = "y" ] ; then
+		DEBUG="yes"
+	else
+		DEBUG="no"
+	fi
+fi
+echo ""
+
+####
+
+TEMP_YN="n"
+if [ "$USE_RUN_CC_PL" = "yes" ] ; then
+	TEMP_YN="y"
+fi
+echo "You can optionally have the build run through run-cc.pl, which will"
+echo "cause warnings and errors (if any) to be colored yellow and red,"
+echo "respectively. This relies on Perl being installed, so if you say yes"
+echo "to this without Perl, the option will be ignored."
+echo "NOTE: If you are using MinGW, it is NOT recommended to say yes to"
+echo "this, it may fail."
+echo "Would you like to utilize run-cc.pl?"
+echo2 "[$TEMP_YN] "
+read YN
+if [ "$YN" ] ; then
+	if [ "$YN" = "y" ] ; then
+		USE_RUN_CC_PL="yes"
+	else
+		USE_RUN_CC_PL="no"
+	fi
+fi
+echo ""
+
+####
+
+TEMP_YN="n"
+if [ "$USE_PCH" = "yes" ] ; then
+	TEMP_YN="y"
+fi
+echo "Do you want to build using precompiled headers? This can speed up"
+echo "the build, but uses more disk space."
+echo2 "[$TEMP_YN] "
+read YN
+if [ "$YN" ] ; then
+	if [ "$YN" = "y" ] ; then
+		USE_PCH="yes"
+	else
+		USE_PCH="no"
+	fi
+fi
+echo ""
+
+####
+
+echo "Are there any extra include directories you wish to use?"
+echo "You may only need to do this if CMake is unable to locate"
+echo "missing dependencies without hints."
+echo "Separate directories with semicolons."
+echo "If you need no extra include directories, enter NONE in all caps."
+echo2 "[$EXTRA_INCLUDE_DIRS] "
+if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+if [ "$INPUT" ] ; then
+	if [ "$INPUT" = "NONE" ] ; then
+		EXTRA_INCLUDE_DIRS=""
+	else
+		EXTRA_INCLUDE_DIRS=$INPUT
+	fi
+fi
+echo ""
+
+####
+
+echo "Are there any extra library directories you wish to use?"
+echo "You may only need to do this if CMake is unable to locate"
+echo "missing dependencies without hints."
+echo "Separate directories with semicolons."
+echo "If you need no extra library directories, enter NONE in all caps."
+echo2 "[$EXTRA_LIB_DIRS] "
+if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+if [ "$INPUT" ] ; then
+	if [ "$INPUT" = "NONE" ] ; then
+		EXTRA_LIB_DIRS=""
+	else
+		EXTRA_LIB_DIRS=$INPUT
+	fi
+fi
+echo ""
+
+####
+
+echo "Are there any extra arguments you wish to pass to CMake?"
+echo "If you need no extra arugments to CMake, enter NONE in all caps."
+echo2 "[$EXTRA_CONFIG_ARGS] "
+if read INPUT ; then : ; else echo "" ; exit 1 ; fi
+if [ "$INPUT" ] ; then
+	if [ "$INPUT" = "NONE" ] ; then
+		EXTRA_CONFIG_ARGS=""
+	else
+		EXTRA_CONFIG_ARGS=$INPUT
+	fi
+fi
+echo ""
+
+####
+
+################################################################################
+# Store values
+################################################################################
+
+echo2 "Saving configuration results in config.cache... "
+
+cat <<EOT >$SOURCE_DIR/config.cache
+INSTDIR="$INSTDIR"
+RUNGROUP="$RUNGROUP"
+UMASK=$UMASK
+DEBUG="$DEBUG"
+USE_RUN_CC_PL="$USE_RUN_CC_PL"
+USE_PCH="$USE_PCH"
+EXTRA_INCLUDE_DIRS="$EXTRA_INCLUDE_DIRS"
+EXTRA_LIB_DIRS="$EXTRA_LIB_DIRS"
+EXTRA_CONFIG_ARGS="$EXTRA_CONFIG_ARGS"
+EOT
+echo "done."
+
+
+################################################################################
+# Build the build system string
+################################################################################
+
+Run_Build_System
