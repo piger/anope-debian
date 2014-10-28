@@ -4,22 +4,14 @@
 # Uncomment this to turn on verbose mode.
 # export DH_VERBOSE=1
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/cmake.mk
+%:
+	dh $@
 
-DEB_CMAKE_EXTRA_FLAGS += -DRUNGROUP:STRING=irc
-DEB_CMAKE_EXTRA_FLAGS += -DDEFUMASK:STRING=077
-DEB_CMAKE_EXTRA_FLAGS += -DCMAKE_BUILD_TYPE:STRING=RELEASE
-DEB_CMAKE_EXTRA_FLAGS += -DUSE_RUN_CC_PL:BOOLEAN=OFF
-DEB_CMAKE_EXTRA_FLAGS += -DUSE_PCH:BOOLEAN=ON
+override_dh_auto_clean:
+	dh_auto_clean --buildsystem=cmake
 
-DEB_CMAKE_EXTRA_FLAGS += -DDB_DIR=share/anope
-DEB_CMAKE_EXTRA_FLAGS += -DLIB_DIR=lib/anope
-DEB_CMAKE_EXTRA_FLAGS += -DLOCALE_DIR=share/locale
-# DEB_CMAKE_EXTRA_FLAGS += -DCONF_DIR=share/anope/conf
-# DEB_CMAKE_EXTRA_FLAGS += -DLOGS_DIR=share/anope/logs
+override_dh_auto_build:
+	dh_auto_build --buildsystem=cmake
 
-override_dh_install:
-	dh_install
-	rm $(CURDIR)/debian/bin/anoperc
-	rm $(CURDIR)/debian/bin/anopesmtp
+override_dh_auto_configure:
+	dh_auto_configure --buildsystem=cmake -- -DRUNGROUP:STRING=irc -DDEFUMASK:STRING=077 -DCMAKE_BUILD_TYPE:STRING=RELEASE -DUSE_RUN_CC_PL:BOOLEAN=OFF -DUSE_PCH:BOOLEAN=ON -DDB_DIR=share/anope -DLIB_DIR=lib/anope -DLOCALE_DIR=share/anope 
