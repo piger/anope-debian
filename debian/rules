@@ -5,13 +5,7 @@
 # export DH_VERBOSE=1
 
 %:
-	dh $@
-
-override_dh_auto_clean:
-	dh_auto_clean --buildsystem=cmake
-
-override_dh_auto_build:
-	dh_auto_build --buildsystem=cmake
+	dh $@ --buildsystem=cmake
 
 override_dh_auto_configure:
 	ln -s $(CURDIR)/modules/extra/m_sasl_dh-aes.cpp $(CURDIR)/modules/m_sasl_dh-aes.cpp
@@ -19,6 +13,4 @@ override_dh_auto_configure:
 	ln -s $(CURDIR)/modules/extra/m_ssl_gnutls.cpp $(CURDIR)/modules/m_ssl_gnutls.cpp
 	ln -s $(CURDIR)/modules/extra/m_ssl_openssl.cpp $(CURDIR)/modules/m_ssl_openssl.cpp
 	dh_auto_configure --buildsystem=cmake -- -DRUNGROUP:STRING=irc -DDEFUMASK:STRING=077 -DCMAKE_BUILD_TYPE:STRING=RELEASE -DUSE_RUN_CC_PL:BOOLEAN=OFF -DUSE_PCH:BOOLEAN=ON -DDB_DIR:STRING=share/anope -DLIB_DIR:STRING=lib/anope -DLOCALE_DIR:STRING=share/anope
-
-# dh_auto_install: make -j1 install DESTDIR=/home/vagrant/merdaio/anope-2.0.1/debian/anope AM_UPDATE_INFO_DIR=no returned exit code 2
 
