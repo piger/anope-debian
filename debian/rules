@@ -14,3 +14,5 @@ override_dh_auto_configure:
 	ln -s $(CURDIR)/modules/extra/m_ssl_openssl.cpp $(CURDIR)/modules/m_ssl_openssl.cpp
 	dh_auto_configure --buildsystem=cmake -- -DRUNGROUP:STRING=irc -DDEFUMASK:STRING=007 -DCMAKE_BUILD_TYPE:STRING=RELEASE -DUSE_RUN_CC_PL:BOOLEAN=OFF -DUSE_PCH:BOOLEAN=ON -DDB_DIR:STRING=share/anope -DLIB_DIR:STRING=lib/anope -DLOCALE_DIR:STRING=share/locale -DCONF_DIR:STRING=share/doc/anope/examples
 
+override_dh_makeshlibs:
+
