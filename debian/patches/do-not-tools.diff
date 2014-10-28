@@ -1,0 +1,32 @@
+--- a/modules/webcpanel/CMakeLists.txt
++++ b/modules/webcpanel/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ build_subdir(${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ install(DIRECTORY templates
+-  DESTINATION "${DB_DIR}/modules/webcpanel"
++  DESTINATION "${DB_DIR}/webcpanel"
+ )
+ 
+--- a/src/tools/CMakeLists.txt
++++ b/src/tools/CMakeLists.txt
+@@ -34,19 +34,3 @@
+     add_to_cpack_ignored_files("${EXE_BINARY}$" TRUE)
+   endif(NOT SKIP)
+ endforeach(SRC)
+-
+-# If not on Windows, generate anoperc and install it along with mydbgen
+-if(NOT WIN32)
+-  configure_file(${Anope_SOURCE_DIR}/src/tools/anoperc.in ${Anope_BINARY_DIR}/src/tools/anoperc)
+-  install (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/anoperc
+-    DESTINATION ${BIN_DIR}
+-  )
+-  install (PROGRAMS geoipupdate.sh
+-    DESTINATION ${BIN_DIR}
+-  )
+-endif(NOT WIN32)
+-
+-# On non-Windows platforms, if RUNGROUP is set, change the permissions of the tools directory
+-if(NOT WIN32 AND RUNGROUP)
+-  install(CODE "execute_process(COMMAND ${CHMOD} 2770 \"\${CMAKE_INSTALL_PREFIX}/bin\")")
+-endif(NOT WIN32 AND RUNGROUP)

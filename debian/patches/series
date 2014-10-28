@@ -1,2 +1,3 @@
+do-not-tools.diff
 cleanup-cmakelists.diff
 change-executable-name.patch
