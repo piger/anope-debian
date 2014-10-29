@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Daniel Kertesz <daniel@spatof.org>
 Build-Depends: debhelper (>= 9.0.0), cmake, libgnutls-dev, libssl-dev
-Standards-Version: 3.9.5
+Standards-Version: 3.9.4
 Homepage: http://anope.org
 
 Package: anope
