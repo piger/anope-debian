@@ -2,12 +2,12 @@ Source: anope
 Section: net
 Priority: optional
 Maintainer: Daniel Kertesz <daniel@spatof.org>
-Build-Depends: debhelper (>= 9.0.0), cmake, libgnutls-dev, libssl-dev
+Build-Depends: debhelper (>= 9.0.0), cmake, libgnutls-dev
 Standards-Version: 3.9.4
 Homepage: http://anope.org
 
 Package: anope
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libssl1.0.0, libgnutlsxx27
+Depends: ${shlibs:Depends}, ${misc:Depends}, libgnutlsxx27
 Description: modular IRC services
  Anope is a set of IRC Services designed for flexibility and ease of use.
