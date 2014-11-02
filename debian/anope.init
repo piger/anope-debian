@@ -19,7 +19,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="anope"
 NAME=anope
 DAEMON=/usr/bin/anope
-DAEMON_ARGS="--config=anope.conf --confdir=/etc/anope --dbdir=/var/lib/anope --localedir=/usr/share/anope/locale --modulesdir=/usr/lib/anope --logdir=/var/log/anope"
+DAEMON_ARGS="--confdir=/etc/anope --config=anope.conf --dbdir=/var/lib/anope --modulesdir=/usr/lib/anope --logdir=/var/log/anope"
 PIDFILE=/var/run/anope/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
