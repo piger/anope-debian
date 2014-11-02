@@ -8,8 +8,6 @@
 	dh $@ --buildsystem=cmake
 
 override_dh_auto_configure:
-	ln -s $(CURDIR)/modules/extra/m_sasl_dh-aes.cpp $(CURDIR)/modules/m_sasl_dh-aes.cpp
-	ln -s $(CURDIR)/modules/extra/m_sasl_dh-blowfish.cpp $(CURDIR)/modules/m_sasl_dh-blowfish.cpp
 	ln -s $(CURDIR)/modules/extra/m_ssl_gnutls.cpp $(CURDIR)/modules/m_ssl_gnutls.cpp
 	dh_auto_configure --buildsystem=cmake -- -DRUNGROUP:STRING=irc -DDEFUMASK:STRING=007 -DCMAKE_BUILD_TYPE:STRING=RELEASE -DUSE_RUN_CC_PL:BOOLEAN=OFF -DUSE_PCH:BOOLEAN=ON -DDB_DIR:STRING=share/anope -DLIB_DIR:STRING=lib/anope -DLOCALE_DIR:STRING=share/locale -DCONF_DIR:STRING=share/doc/anope/examples
 
