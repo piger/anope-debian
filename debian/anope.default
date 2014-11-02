@@ -1,0 +1,3 @@
+# Please customize the configuration for Anope in /etc/anope first and then
+# set ANOPE_ENABLED to '1'.
+ANOPE_ENABLED=0

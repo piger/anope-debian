@@ -1,0 +1,5 @@
+debian/anope.conf etc/anope/
+debian/chanserv.conf etc/anope/
+debian/global.conf etc/anope/
+debian/nickserv.conf etc/anope
+debian/anope.motd etc/anope
