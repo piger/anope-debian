@@ -20,6 +20,7 @@ DESC="anope"
 NAME=anope
 DAEMON=/usr/bin/anope
 DAEMON_ARGS="--confdir=/etc/anope --config=anope.conf --dbdir=/var/lib/anope --modulesdir=/usr/lib/anope --logdir=/var/log/anope"
+USER="irc"
 PIDFILE=/var/run/anope/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
@@ -46,9 +47,9 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+	start-stop-daemon --start --quiet --background --chuid "$USER" --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --background --pidfile $PIDFILE --exec $DAEMON -- \
+	start-stop-daemon --start --quiet --background --chuid "$USER" --pidfile $PIDFILE --exec $DAEMON -- \
 		$DAEMON_ARGS \
 		|| return 2
 	# The above code will not work for interpreted scripts, use the next
