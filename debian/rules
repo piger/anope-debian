@@ -9,6 +9,10 @@
 
 override_dh_auto_configure:
 	ln -s $(CURDIR)/modules/extra/m_ssl_gnutls.cpp $(CURDIR)/modules/m_ssl_gnutls.cpp
+	ln -s $(CURDIR)/modules/extra/m_ldap.cpp $(CURDIR)/modules/m_ldap.cpp
+	ln -s $(CURDIR)/modules/extra/m_ldap_authentication.cpp $(CURDIR)/modules/m_ldap_authentication.cpp
+	ln -s $(CURDIR)/modules/extra/m_mysql.cpp $(CURDIR)/modules/m_mysql.cpp
+	ln -s $(CURDIR)/modules/extra/m_sqlite.cpp $(CURDIR)/modules/m_sqlite.cpp
 	dh_auto_configure --buildsystem=cmake -- -DRUNGROUP:STRING=irc -DDEFUMASK:STRING=007 -DCMAKE_BUILD_TYPE:STRING=RELEASE -DUSE_RUN_CC_PL:BOOLEAN=OFF -DUSE_PCH:BOOLEAN=ON -DDB_DIR:STRING=share/anope -DLIB_DIR:STRING=lib/anope -DLOCALE_DIR:STRING=share/locale -DCONF_DIR:STRING=share/doc/anope/examples
 
 override_dh_makeshlibs:
