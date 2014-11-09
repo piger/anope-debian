@@ -17,3 +17,6 @@ override_dh_auto_configure:
 
 override_dh_makeshlibs:
 
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -f $(CURDIR)/modules/m_ssl_gnutls.cpp $(CURDIR)/modules/m_ldap.cpp $(CURDIR)/modules/m_ldap_authentication.cpp $(CURDIR)/modules/m_mysql.cpp $(CURDIR)/modules/m_sqlite.cpp
